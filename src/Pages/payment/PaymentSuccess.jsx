@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { paymentsAPI } from '../services/api';
+import { paymentsAPI } from '../../services/api';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();

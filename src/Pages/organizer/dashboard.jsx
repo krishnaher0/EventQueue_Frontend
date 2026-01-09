@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { eventsAPI } from '../services/api';
+import { useAuth } from '../../context/AuthContext';
+import { eventsAPI } from '../../services/api';
 
 const OrganizerDashboard = () => {
   const { user, isAuthenticated } = useAuth();
@@ -199,7 +199,7 @@ const OrganizerDashboard = () => {
                     <div className="flex items-center gap-4">
                       <div className="w-14 h-14 bg-slate-100 rounded-lg overflow-hidden">
                         {event.image ? (
-                          <img src={`http://localhost:5001${event.image}`} alt={event.title} className="w-full h-full object-cover" />
+                          <img src={`http://localhost:3000${event.image}`} alt={event.title} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-slate-400">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -261,7 +261,7 @@ const OrganizerDashboard = () => {
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
                             {event.image ? (
-                              <img src={`http://localhost:5001${event.image}`} alt={event.title} className="w-full h-full object-cover" />
+                              <img src={`http://localhost:3000${event.image}`} alt={event.title} className="w-full h-full object-cover" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-slate-400">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -445,7 +445,7 @@ const OrganizerDashboard = () => {
                   <div key={event._id} className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg">
                     <div className="w-16 h-16 bg-white rounded-lg overflow-hidden flex-shrink-0">
                       {event.image ? (
-                        <img src={`http://localhost:5001${event.image}`} alt={event.title} className="w-full h-full object-cover" />
+                        <img src={`http://localhost:3000${event.image}`} alt={event.title} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-slate-400">
                           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
