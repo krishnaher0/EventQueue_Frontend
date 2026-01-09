@@ -1,35 +1,132 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
+import { CartProvider } from './context/CartContext';
+import { NotificationProvider } from './context/NotificationContext';
+import Header from './components/common/Header';
+import Footer from './components/common/Footer';
+
+
+
+// Event pages
+import Events from './pages/events/Events';
+import EventDetail from './pages/events/EventDetail';
+import CreateEvent from './pages/events/CreateEvent';
+
+// Shop pages
+import Shop from './pages/shop/Shop';
+import ProductDetail from './pages/shop/ProductDetail';
+import Cart from './pages/shop/Cart';
+import Checkout from './pages/shop/Checkout';
+
+// Venue pages
+import Venues from './pages/venues/Venues';
+import VenueDetail from './pages/venues/VenueDetail';
+
+// Payment pages
+import PaymentSuccess from './pages/payment/PaymentSuccess';
+import PaymentFailure from './pages/payment/PaymentFailure';
+
+// Profile pages
+import Profile from './pages/profile/Profile';
+import MyTickets from './pages/profile/MyTickets';
+
+// Blog pages
+
+
+// Community pages
+
+// Misc pages
+import TestPayment from './pages/misc/TestPayment';
+
+import './App.css';
+import MyVenueBookings from './pages/venues/MyVenueBookings';
+import MyOrders from './pages/shop/MyOrders';
+import AdminEvents from './pages/admin/AdminEvents';
+import RequestHost from './Pages/organizer/RequestHost';
+import AdminProducts from './pages/admin/AdminProducts';
+import AdminVenues from './Pages/admin/AdminVenues';
+
+import LoginPage from './pages/auth/Login';
+import SignupPage from './Pages/auth/Signup';
+import ForgotPassword from './Pages/auth/ForgotPassword';
+import VerifyCode from './Pages/auth/VerifyCode';
+import ResetPassword from './Pages/auth/ResetPassword';
+import HomePage from './Pages/static/Home';
+import AuthCallback from './Pages/auth/AuthCallback';
+import AdminDashboard from './Pages/admin/AdminDashboard';
+import OrganizerDashboard from './Pages/organizer/dashboard';
+import { Contact } from 'lucide-react';
+import FAQ from './Pages/static/FAQ';
+import Terms from './Pages/static/Terms';
+import Privacy from './Pages/static/Privacy';
+
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <AuthProvider>
+      <ToastProvider>
+        <CartProvider>
+          <Router>
+            <NotificationProvider>
+              <div className="min-h-screen flex flex-col">
+                <Header />
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/signup" element={<SignupPage />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/verify-code" element={<VerifyCode />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
+                  <Route path="/request-host" element={<RequestHost />} />
+                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin/products" element={<AdminProducts />} />
+                  <Route path="/admin/events" element={<AdminEvents />} />
+                  <Route path="/admin/venues" element={<AdminVenues />} />
+                  <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />
+                  <Route path="/create-event" element={<CreateEvent />} />
+
+                  {/* Event Routes */}
+                  <Route path="/events" element={<Events />} />
+                  <Route path="/events/:id" element={<EventDetail />} />
+                  <Route path="/my-tickets" element={<MyTickets />} />
+                  <Route path="/my-venue-bookings" element={<MyVenueBookings />} />
+                   <Route path="/my-orders" element={<MyOrders />} />
+
+
+                  {/* Shop Routes */}
+                  <Route path="/shop" element={<Shop />} />
+                  <Route path="/shop/:id" element={<ProductDetail />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/checkout" element={<Checkout />} />
+
+                  {/* Venue Routes */}
+                  <Route path="/venues" element={<Venues />} />
+                  <Route path="/venues/:id" element={<VenueDetail />} />
+
+                  {/* Payment Routes */}
+                  <Route path="/payment/success" element={<PaymentSuccess />} />
+                  <Route path="/payment/failure" element={<PaymentFailure />} />
+                  <Route path="/payment/test" element={<TestPayment />} />
+
+                  {/* User Routes */}
+                  <Route path="/profile" element={<Profile />} />
+                 
+                  
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/faq" element={<FAQ />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                </Routes>
+                <Footer />
+              </div>
+            </NotificationProvider>
+          </Router>
+        </CartProvider>
+      </ToastProvider>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;

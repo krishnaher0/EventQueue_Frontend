@@ -62,7 +62,7 @@ const Header = () => {
 
         {/* Navigation - centered with larger text */}
         <nav className="hidden lg:flex items-center gap-10">
-          <Link to="/" className="text-slate-600 text-[16px] font-medium hover:text-primary transition-colors">Discover</Link>
+          <Link to="/" className="text-slate-600 text-[16px] font-medium hover:text-primary transition-colors">Home</Link>
           <Link to="/events" className="text-slate-600 text-[16px] font-medium hover:text-primary transition-colors">Events</Link>
           <Link to="/shop" className="text-slate-600 text-[16px] font-medium hover:text-primary transition-colors">Shop</Link>
           <Link to="/venues" className="text-slate-600 text-[16px] font-medium hover:text-primary transition-colors">Venues</Link>
