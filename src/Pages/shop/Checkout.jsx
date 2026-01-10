@@ -9,6 +9,7 @@ const Checkout = () => {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('esewa');
   const [formData, setFormData] = useState({
     fullName: user?.fullName || '',
     email: user?.email || '',
@@ -69,28 +70,35 @@ const Checkout = () => {
 
       const response = await paymentsAPI.initiateOrderPayment(
         items,
-        shippingAddress
+        shippingAddress,
+        paymentMethod
       );
 
       if (response.success) {
-        // Redirect to eSewa
-        const { esewaUrl, esewaPayload } = response.data;
+        if (paymentMethod === 'khalti') {
+          // Redirect to Khalti
+          const { khaltiPaymentUrl } = response.data;
+          window.location.href = khaltiPaymentUrl;
+        } else {
+          // Redirect to eSewa
+          const { esewaUrl, esewaPayload } = response.data;
 
-        // Create form and submit to eSewa
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = esewaUrl;
+          // Create form and submit to eSewa
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = esewaUrl;
 
-        Object.entries(esewaPayload).forEach(([key, value]) => {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = key;
-          input.value = value;
-          form.appendChild(input);
-        });
+          Object.entries(esewaPayload).forEach(([key, value]) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = value;
+            form.appendChild(input);
+          });
 
-        document.body.appendChild(form);
-        form.submit();
+          document.body.appendChild(form);
+          form.submit();
+        }
       }
     } catch (err) {
       setError(err.message || 'Failed to initiate payment');
@@ -224,35 +232,87 @@ const Checkout = () => {
                 <h2 className="text-lg font-bold text-gray-900 mb-6">
                   Payment Method
                 </h2>
-                <div className="p-4 border-2 border-green-500 bg-green-50 rounded-xl flex items-center gap-4">
-                  <img
-                    src="https://esewa.com.np/common/images/esewa-logo.png"
-                    alt="eSewa"
-                    className="h-10"
-                  />
-                  <div>
-                    <p className="font-semibold text-gray-900">eSewa</p>
-                    <p className="text-sm text-gray-500">
-                      Pay securely with eSewa digital wallet
-                    </p>
-                  </div>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 text-green-500 ml-auto"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                <div className="space-y-4">
+                  {/* eSewa */}
+                  <div
+                    onClick={() => setPaymentMethod('esewa')}
+                    className={`p-4 border-2 rounded-xl flex items-center gap-4 cursor-pointer transition-all ${
+                      paymentMethod === 'esewa'
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
+                    <img
+                      src="https://esewa.com.np/common/images/esewa-logo.png"
+                      alt="eSewa"
+                      className="h-10"
                     />
-                  </svg>
+                    <div>
+                      <p className="font-semibold text-gray-900">eSewa</p>
+                      <p className="text-sm text-gray-500">
+                        Pay securely with eSewa digital wallet
+                      </p>
+                    </div>
+                    {paymentMethod === 'esewa' && (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6 text-green-500 ml-auto"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    )}
+                  </div>
+
+                  {/* Khalti */}
+                  <div
+                    onClick={() => setPaymentMethod('khalti')}
+                    className={`p-4 border-2 rounded-xl flex items-center gap-4 cursor-pointer transition-all ${
+                      paymentMethod === 'khalti'
+                        ? 'border-purple-500 bg-purple-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <img
+                      src="https://khalti.com/static/images/logo1.png"
+                      alt="Khalti"
+                      className="h-10"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-900">Khalti</p>
+                      <p className="text-sm text-gray-500">
+                        Pay securely with Khalti digital wallet
+                      </p>
+                    </div>
+                    {paymentMethod === 'khalti' && (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6 text-purple-500 ml-auto"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    )}
+                  </div>
                 </div>
                 <p className="mt-4 text-sm text-gray-500">
-                  Test Credentials: eSewa ID: 9806800001, Password: Nepal@123, MPIN: 1122
+                  <strong>Test Credentials:</strong><br />
+                  eSewa - ID: 9806800001, Password: Nepal@123, MPIN: 1122<br />
+                  Khalti - ID: 9800000000, MPIN: 1111, OTP: 987654
                 </p>
               </div>
             </div>
