@@ -25,24 +25,46 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  // const fetchUser = async () => {
+  //   try {
+  //     const response = await authAPI.getMe();
+  //     setUser(response.data.user);
+  //   } catch (err) {
+  //     localStorage.removeItem('token');
+  //     setUser(null);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const fetchUser = async () => {
-    try {
-      const response = await authAPI.getMe();
-      setUser(response.data.user);
-    } catch (err) {
-      localStorage.removeItem('token');
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const response = await authAPI.getMe();
+    const apiUser = response.data.user;
+
+    setUser({
+      ...apiUser,
+      _id: apiUser._id || apiUser.id, // normalize here
+    });
+  } catch (err) {
+    localStorage.removeItem('token');
+    setUser(null);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const login = async (credentials) => {
     setError(null);
     try {
       const response = await authAPI.login(credentials);
       localStorage.setItem('token', response.data.token);
-      setUser(response.data.user);
+      // setUser(response.data.user);
+      setUser({
+  ...response.data.user,
+  _id: response.data.user._id || response.data.user.id,
+});
+
       return response;
     } catch (err) {
       setError(err.message || 'Login failed');
@@ -55,7 +77,11 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authAPI.signup(userData);
       localStorage.setItem('token', response.data.token);
-      setUser(response.data.user);
+      // setUser(response.data.user);
+      setUser({
+  ...response.data.user,
+  _id: response.data.user._id || response.data.user.id,
+});
       return response;
     } catch (err) {
       setError(err.message || 'Signup failed');
@@ -80,6 +106,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUser = (updatedUser) => {
+    setUser(updatedUser);
+  };
+
   const value = {
     user,
     loading,
@@ -88,6 +118,7 @@ export const AuthProvider = ({ children }) => {
     signup,
     logout,
     handleGoogleCallback,
+    updateUser,
     isAuthenticated: !!user,
   };
 

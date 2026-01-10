@@ -8,6 +8,8 @@ export { paymentsAPI } from './paymentApi.js';
 export { organizerAPI } from './organizerApi.js';
 export { ordersAPI } from './orderApi.js';
 export { reviewsAPI } from './reviewApi.js';
+export { blogAPI } from './blogApi.js';
+export { communityAPI } from './communityApi.js';
 
 
 // Also export utils

@@ -150,4 +150,12 @@ export const eventsAPI = {
     });
     return handleResponse(response);
   },
+
+  getAllEventBookings: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const response = await fetch(`${API_BASE_URL}/events/admin/bookings?${queryString}`, {
+      headers: { ...getAuthHeader() },
+    });
+    return handleResponse(response);
+  },
 };

@@ -42,11 +42,11 @@ export const paymentsAPI = {
   },
 
   // Order payment
-  initiateOrderPayment: async (items, shippingAddress) => {
+  initiateOrderPayment: async (items, shippingAddress, paymentMethod = 'esewa') => {
     const response = await fetch(`${API_BASE_URL}/payments/order/initiate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-      body: JSON.stringify({ items, shippingAddress }),
+      body: JSON.stringify({ items, shippingAddress, paymentMethod }),
     });
     return handleResponse(response);
   },

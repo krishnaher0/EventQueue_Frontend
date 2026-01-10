@@ -66,6 +66,8 @@ const Header = () => {
           <Link to="/events" className="text-slate-600 text-[16px] font-medium hover:text-primary transition-colors">Events</Link>
           <Link to="/shop" className="text-slate-600 text-[16px] font-medium hover:text-primary transition-colors">Shop</Link>
           <Link to="/venues" className="text-slate-600 text-[16px] font-medium hover:text-primary transition-colors">Venues</Link>
+          <Link to="/blogs" className="text-slate-600 text-[16px] font-medium hover:text-primary transition-colors">Blogs</Link>
+          <Link to="/communities" className="text-slate-600 text-[16px] font-medium hover:text-primary transition-colors">Communities</Link>
         </nav>
 
         {/* Actions - pushed right */}
@@ -294,6 +296,8 @@ const Header = () => {
             <Link to="/events" className="py-3 text-slate-600 font-medium hover:text-primary" onClick={() => setIsMenuOpen(false)}>Events</Link>
             <Link to="/shop" className="py-3 text-slate-600 font-medium hover:text-primary" onClick={() => setIsMenuOpen(false)}>Shop</Link>
             <Link to="/venues" className="py-3 text-slate-600 font-medium hover:text-primary" onClick={() => setIsMenuOpen(false)}>Venues</Link>
+            <Link to="/blogs" className="py-3 text-slate-600 font-medium hover:text-primary" onClick={() => setIsMenuOpen(false)}>Blogs</Link>
+            <Link to="/communities" className="py-3 text-slate-600 font-medium hover:text-primary" onClick={() => setIsMenuOpen(false)}>Communities</Link>
             <Link to="/cart" className="py-3 text-slate-600 font-medium hover:text-primary flex items-center gap-2" onClick={() => setIsMenuOpen(false)}>
               Cart
               {cartItemCount > 0 && (

@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { CartProvider } from './context/CartContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { SocketProvider } from './context/SocketContext';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
 
@@ -32,20 +33,29 @@ import Profile from './pages/profile/Profile';
 import MyTickets from './pages/profile/MyTickets';
 
 // Blog pages
+import Blogs from './Pages/blogs/Blogs';
+import BlogDetail from './Pages/blogs/BlogDetail';
+import CreateBlog from './Pages/blogs/CreateBlog';
 
 
 // Community pages
+import Communities from './Pages/communities/Communities';
+import CommunityDetail from './Pages/communities/CommunityDetail';
+import CreateCommunity from './Pages/communities/CreateCommunity';
 
 // Misc pages
 import TestPayment from './pages/misc/TestPayment';
 
 import './App.css';
-import MyVenueBookings from './pages/venues/MyVenueBookings';
-import MyOrders from './pages/shop/MyOrders';
+import MyVenueBookings from './Pages/venues/MyVenueBookings';
+import MyOrders from './Pages/shop/MyOrders';
 import AdminEvents from './pages/admin/AdminEvents';
 import RequestHost from './Pages/organizer/RequestHost';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminVenues from './Pages/admin/AdminVenues';
+import AdminEventBookings from './Pages/admin/AdminEventBookings';
+import AdminVenueBookings from './Pages/admin/AdminVenueBookings';
+import AdminOrders from './Pages/admin/AdminOrders';
 
 import LoginPage from './pages/auth/Login';
 import SignupPage from './Pages/auth/Signup';
@@ -66,12 +76,13 @@ function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <CartProvider>
-          <Router>
-            <NotificationProvider>
-              <div className="min-h-screen flex flex-col">
-                <Header />
-                <Routes>
+        <SocketProvider>
+          <CartProvider>
+            <Router>
+              <NotificationProvider>
+                <div className="min-h-screen flex flex-col">
+                  <Header />
+                  <Routes>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/signup" element={<SignupPage />} />
@@ -84,6 +95,9 @@ function App() {
                   <Route path="/admin/products" element={<AdminProducts />} />
                   <Route path="/admin/events" element={<AdminEvents />} />
                   <Route path="/admin/venues" element={<AdminVenues />} />
+                  <Route path="/admin/event-bookings" element={<AdminEventBookings />} />
+                  <Route path="/admin/venue-bookings" element={<AdminVenueBookings />} />
+                  <Route path="/admin/orders" element={<AdminOrders />} />
                   <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />
                   <Route path="/create-event" element={<CreateEvent />} />
 
@@ -105,6 +119,16 @@ function App() {
                   <Route path="/venues" element={<Venues />} />
                   <Route path="/venues/:id" element={<VenueDetail />} />
 
+                  {/* Blog Routes */}
+                  <Route path="/blogs" element={<Blogs />} />
+                  <Route path="/blogs/create" element={<CreateBlog />} />
+                  <Route path="/blogs/:slug" element={<BlogDetail />} />
+
+                  {/* Community Routes */}
+                  <Route path="/communities" element={<Communities />} />
+                  <Route path="/communities/create" element={<CreateCommunity />} />
+                  <Route path="/communities/:slug" element={<CommunityDetail />} />
+
                   {/* Payment Routes */}
                   <Route path="/payment/success" element={<PaymentSuccess />} />
                   <Route path="/payment/failure" element={<PaymentFailure />} />
@@ -118,12 +142,13 @@ function App() {
                   <Route path="/faq" element={<FAQ />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
-                </Routes>
-                <Footer />
-              </div>
-            </NotificationProvider>
-          </Router>
-        </CartProvider>
+                  </Routes>
+                  <Footer />
+                </div>
+              </NotificationProvider>
+            </Router>
+          </CartProvider>
+        </SocketProvider>
       </ToastProvider>
     </AuthProvider>
   );

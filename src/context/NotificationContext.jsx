@@ -21,67 +21,70 @@ export const NotificationProvider = ({ children }) => {
   const socketRef = useRef(null);
 
   useEffect(() => {
-    if (isAuthenticated && user) {
-      // Connect to WebSocket server
-      socketRef.current = io('http://localhost:3000', {
-        auth: {
-          token: localStorage.getItem('token'),
-        },
-      });
+    // Socket.IO temporarily disabled - will be implemented later
+    // Uncomment this code when backend Socket.IO is ready
 
-      socketRef.current.on('connect', () => {
-        console.log('Connected to notification server');
-      });
+    // if (isAuthenticated && user) {
+    //   // Connect to WebSocket server
+    //   socketRef.current = io('http://localhost:3000', {
+    //     auth: {
+    //       token: localStorage.getItem('token'),
+    //     },
+    //   });
 
-      // Listen for notifications
-      socketRef.current.on('notification', (data) => {
-        const notification = {
-          id: Date.now(),
-          ...data,
-          read: false,
-          createdAt: new Date().toISOString(),
-        };
-        setNotifications((prev) => [notification, ...prev]);
-        setUnreadCount((prev) => prev + 1);
+    //   socketRef.current.on('connect', () => {
+    //     console.log('Connected to notification server');
+    //   });
 
-        // Show toast based on notification type
-        switch (data.type) {
-          case 'booking':
-            toast.success(data.message);
-            break;
-          case 'order':
-            toast.success(data.message);
-            break;
-          case 'product':
-            toast.info(data.message);
-            break;
-          case 'event':
-            toast.info(data.message);
-            break;
-          case 'venue':
-            toast.info(data.message);
-            break;
-          case 'review':
-            toast.success(data.message);
-            break;
-          case 'error':
-            toast.error(data.message);
-            break;
-          default:
-            toast.info(data.message);
-        }
-      });
+    //   // Listen for notifications
+    //   socketRef.current.on('notification', (data) => {
+    //     const notification = {
+    //       id: Date.now(),
+    //       ...data,
+    //       read: false,
+    //       createdAt: new Date().toISOString(),
+    //     };
+    //     setNotifications((prev) => [notification, ...prev]);
+    //     setUnreadCount((prev) => prev + 1);
 
-      socketRef.current.on('disconnect', () => {
-        console.log('Disconnected from notification server');
-      });
+    //     // Show toast based on notification type
+    //     switch (data.type) {
+    //       case 'booking':
+    //         toast.success(data.message);
+    //         break;
+    //       case 'order':
+    //         toast.success(data.message);
+    //         break;
+    //       case 'product':
+    //         toast.info(data.message);
+    //         break;
+    //       case 'event':
+    //         toast.info(data.message);
+    //         break;
+    //       case 'venue':
+    //         toast.info(data.message);
+    //         break;
+    //       case 'review':
+    //         toast.success(data.message);
+    //         break;
+    //       case 'error':
+    //         toast.error(data.message);
+    //         break;
+    //       default:
+    //         toast.info(data.message);
+    //     }
+    //   });
 
-      return () => {
-        if (socketRef.current) {
-          socketRef.current.disconnect();
-        }
-      };
-    }
+    //   socketRef.current.on('disconnect', () => {
+    //     console.log('Disconnected from notification server');
+    //   });
+
+    //   return () => {
+    //     if (socketRef.current) {
+    //       socketRef.current.disconnect();
+    //     }
+    //   };
+    // }
   }, [isAuthenticated, user, toast]);
 
   const markAsRead = useCallback((notificationId) => {

@@ -70,7 +70,7 @@ export const venuesAPI = {
 
   getAllBookingsAdmin: async (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
-    const response = await fetch(`${API_BASE_URL}/venues/bookings/admin?${queryString}`, {
+    const response = await fetch(`${API_BASE_URL}/venues/admin/bookings?${queryString}`, {
       headers: { ...getAuthHeader() },
     });
     return handleResponse(response);

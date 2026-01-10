@@ -70,9 +70,10 @@ export const authAPI = {
   },
 
   updateProfile: async (profileData) => {
+    // Don't set Content-Type header for FormData - browser will set it automatically with boundary
     const response = await fetch(`${API_BASE_URL}/auth/profile`, {
       method: 'PUT',
-      headers: { ...getAuthHeader() },
+      headers: getAuthHeader(),
       body: profileData,
     });
     return handleResponse(response);
