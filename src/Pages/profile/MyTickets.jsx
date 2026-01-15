@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '../../services/api';
+import { refundAPI } from '../../services/refundApi';
 import { useAuth } from '../../context/AuthContext';
+import TicketDownloader from '../../components/tickets/TicketDownloader';
+import RefundModal from '../../components/tickets/RefundModal';
 
 const MyTickets = () => {
   const navigate = useNavigate();
@@ -9,6 +12,9 @@ const MyTickets = () => {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [refundTicket, setRefundTicket] = useState(null);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -67,6 +73,48 @@ const MyTickets = () => {
     return new Date(date) > new Date();
   };
 
+  const canRequestRefund = (ticket) => {
+    if (!ticket.event.startDate || ticket.status !== 'confirmed') return false;
+    const eventDate = new Date(ticket.event.startDate);
+    const now = new Date();
+    const hoursDiff = (eventDate - now) / (1000 * 60 * 60);
+    return hoursDiff > 24; // More than 24 hours before event
+  };
+
+  const handleRefundRequest = (ticket) => {
+    setRefundTicket(ticket);
+    setShowRefundModal(true);
+  };
+
+  const handleRefundSubmit = async (ticket, formData) => {
+    try {
+      const bankDetails = formData.accountName ? {
+        accountName: formData.accountName,
+        accountNumber: formData.accountNumber,
+        bankName: formData.bankName,
+        branch: formData.branch
+      } : undefined;
+
+      await refundAPI.requestRefund(
+        ticket.event._id,
+        ticket._id,
+        formData.reason,
+        bankDetails
+      );
+
+      // Refresh tickets
+      await fetchTickets();
+      setShowRefundModal(false);
+      setRefundTicket(null);
+
+      // Show success message
+      alert('Refund request submitted successfully! Admin will review your request.');
+    } catch (err) {
+      console.error('Refund request error:', err);
+      throw new Error(err.message || 'Failed to submit refund request');
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-slate-50 py-8 px-4">
@@ -93,6 +141,26 @@ const MyTickets = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* Ticket Downloader Modal */}
+      {selectedTicket && (
+        <TicketDownloader
+          ticket={selectedTicket}
+          onClose={() => setSelectedTicket(null)}
+        />
+      )}
+
+      {/* Refund Request Modal */}
+      {showRefundModal && refundTicket && (
+        <RefundModal
+          ticket={refundTicket}
+          onClose={() => {
+            setShowRefundModal(false);
+            setRefundTicket(null);
+          }}
+          onSubmit={handleRefundSubmit}
+        />
+      )}
+
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 py-8">
@@ -137,7 +205,16 @@ const MyTickets = () => {
                   {tickets
                     .filter(t => isUpcoming(t.event.startDate))
                     .map((ticket) => (
-                      <TicketCard key={ticket._id} ticket={ticket} formatDate={formatDate} formatPrice={formatPrice} getStatusColor={getStatusColor} />
+                      <TicketCard
+                        key={ticket._id}
+                        ticket={ticket}
+                        formatDate={formatDate}
+                        formatPrice={formatPrice}
+                        getStatusColor={getStatusColor}
+                        onDownload={() => setSelectedTicket(ticket)}
+                        onRefund={() => handleRefundRequest(ticket)}
+                        canRequestRefund={canRequestRefund(ticket)}
+                      />
                     ))}
                 </div>
               </div>
@@ -151,7 +228,15 @@ const MyTickets = () => {
                   {tickets
                     .filter(t => !isUpcoming(t.event.startDate))
                     .map((ticket) => (
-                      <TicketCard key={ticket._id} ticket={ticket} formatDate={formatDate} formatPrice={formatPrice} getStatusColor={getStatusColor} isPast />
+                      <TicketCard
+                        key={ticket._id}
+                        ticket={ticket}
+                        formatDate={formatDate}
+                        formatPrice={formatPrice}
+                        getStatusColor={getStatusColor}
+                        onDownload={() => setSelectedTicket(ticket)}
+                        isPast
+                      />
                     ))}
                 </div>
               </div>
@@ -163,7 +248,7 @@ const MyTickets = () => {
   );
 };
 
-const TicketCard = ({ ticket, formatDate, formatPrice, getStatusColor, isPast }) => {
+const TicketCard = ({ ticket, formatDate, formatPrice, getStatusColor, onDownload, onRefund, canRequestRefund, isPast }) => {
   const { event } = ticket;
 
   return (
@@ -240,9 +325,67 @@ const TicketCard = ({ ticket, formatDate, formatPrice, getStatusColor, isPast })
             {!isPast && ticket.status === 'confirmed' && (
               <>
                 <span className="text-slate-300">|</span>
-                <button className="text-sm text-slate-600 font-medium hover:text-slate-800">
+                <button
+                  onClick={onDownload}
+                  className="text-sm text-slate-600 font-medium hover:text-slate-800 flex items-center gap-1"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
+                  </svg>
                   Download Ticket
                 </button>
+                {canRequestRefund && (
+                  <>
+                    <span className="text-slate-300">|</span>
+                    <button
+                      onClick={onRefund}
+                      className="text-sm text-red-600 font-medium hover:text-red-800 flex items-center gap-1"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+                        />
+                      </svg>
+                      Request Refund
+                    </button>
+                  </>
+                )}
+              </>
+            )}
+            {ticket.status === 'refund_requested' && (
+              <>
+                <span className="text-slate-300">|</span>
+                <span className="text-sm text-orange-600 font-medium">
+                  Refund Pending
+                </span>
+              </>
+            )}
+            {ticket.status === 'refunded' && (
+              <>
+                <span className="text-slate-300">|</span>
+                <span className="text-sm text-green-600 font-medium">
+                  Refunded
+                </span>
               </>
             )}
           </div>

@@ -319,7 +319,7 @@ const CreateBlog = () => {
               </button>
               <button
                 type="button"
-                onClick={(e) => handleSubmit(e, 'draft')}
+                onClick={(e) => handleSubmit(e, 'published')}
                 disabled={loading}
                 className="flex-1 px-6 py-3 bg-slate-200 text-black-700 rounded-lg hover:bg-slate-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
