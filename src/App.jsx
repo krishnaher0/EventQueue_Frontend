@@ -13,6 +13,7 @@ import Footer from './components/common/Footer';
 import Events from './pages/events/Events';
 import EventDetail from './pages/events/EventDetail';
 import CreateEvent from './pages/events/CreateEvent';
+import Calendar from './pages/events/Calendar';
 
 // Shop pages
 import Shop from './pages/shop/Shop';
@@ -45,6 +46,7 @@ import CreateCommunity from './Pages/communities/CreateCommunity';
 
 // Misc pages
 import TestPayment from './pages/misc/TestPayment';
+import TestNotifications from './pages/misc/TestNotifications';
 
 import './App.css';
 import MyVenueBookings from './Pages/venues/MyVenueBookings';
@@ -65,11 +67,13 @@ import ResetPassword from './Pages/auth/ResetPassword';
 import HomePage from './Pages/static/Home';
 import AuthCallback from './Pages/auth/AuthCallback';
 import AdminDashboard from './Pages/admin/AdminDashboard';
+import AdminAnalytics from './Pages/admin/AdminAnalytics';
 import OrganizerDashboard from './Pages/organizer/dashboard';
-import { Contact } from 'lucide-react';
+
 import FAQ from './Pages/static/FAQ';
 import Terms from './Pages/static/Terms';
 import Privacy from './Pages/static/Privacy';
+import ContactPage from './Pages/static/Contact';
 
 
 function App() {
@@ -92,6 +96,7 @@ function App() {
                   <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route path="/request-host" element={<RequestHost />} />
                   <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin/analytics" element={<AdminAnalytics />} />
                   <Route path="/admin/products" element={<AdminProducts />} />
                   <Route path="/admin/events" element={<AdminEvents />} />
                   <Route path="/admin/venues" element={<AdminVenues />} />
@@ -104,6 +109,7 @@ function App() {
                   {/* Event Routes */}
                   <Route path="/events" element={<Events />} />
                   <Route path="/events/:id" element={<EventDetail />} />
+                  <Route path="/calendar" element={<Calendar />} />
                   <Route path="/my-tickets" element={<MyTickets />} />
                   <Route path="/my-venue-bookings" element={<MyVenueBookings />} />
                    <Route path="/my-orders" element={<MyOrders />} />
@@ -134,11 +140,14 @@ function App() {
                   <Route path="/payment/failure" element={<PaymentFailure />} />
                   <Route path="/payment/test" element={<TestPayment />} />
 
+                  {/* Test Routes */}
+                  <Route path="/test/notifications" element={<TestNotifications />} />
+
                   {/* User Routes */}
                   <Route path="/profile" element={<Profile />} />
                  
                   
-                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/contacts" element={<ContactPage />} />
                   <Route path="/faq" element={<FAQ />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />

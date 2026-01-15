@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI } from '../services/api';
+import { initializeSocket, disconnectSocket } from '../services/socket';
 
 export const AuthContext = createContext(null);
 
@@ -45,6 +46,12 @@ export const AuthProvider = ({ children }) => {
       ...apiUser,
       _id: apiUser._id || apiUser.id, // normalize here
     });
+
+    // Initialize socket connection
+    const token = localStorage.getItem('token');
+    if (token) {
+      initializeSocket(token);
+    }
   } catch (err) {
     localStorage.removeItem('token');
     setUser(null);
@@ -59,11 +66,13 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authAPI.login(credentials);
       localStorage.setItem('token', response.data.token);
-      // setUser(response.data.user);
       setUser({
-  ...response.data.user,
-  _id: response.data.user._id || response.data.user.id,
-});
+        ...response.data.user,
+        _id: response.data.user._id || response.data.user.id,
+      });
+
+      // Initialize socket connection
+      initializeSocket(response.data.token);
 
       return response;
     } catch (err) {
@@ -92,6 +101,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
+    disconnectSocket(); // Disconnect socket on logout
   };
 
   const handleGoogleCallback = async (token) => {

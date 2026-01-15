@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
+import { useSocket } from './SocketContext';
+import { notificationAPI } from '../services/notificationApi';
 
 const NotificationContext = createContext(null);
 
@@ -16,87 +17,146 @@ export const useNotification = () => {
 export const NotificationProvider = ({ children }) => {
   const { user, isAuthenticated } = useAuth();
   const toast = useToast();
+  const { socket, connected } = useSocket();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const socketRef = useRef(null);
+  const [loading, setLoading] = useState(false);
 
+  // Request browser notification permission
   useEffect(() => {
-    // Socket.IO temporarily disabled - will be implemented later
-    // Uncomment this code when backend Socket.IO is ready
+    if (isAuthenticated && user && Notification.permission === 'default') {
+      Notification.requestPermission().then((permission) => {
+        console.log('Notification permission:', permission);
+      });
+    }
+  }, [isAuthenticated, user]);
 
-    // if (isAuthenticated && user) {
-    //   // Connect to WebSocket server
-    //   socketRef.current = io('http://localhost:3000', {
-    //     auth: {
-    //       token: localStorage.getItem('token'),
-    //     },
-    //   });
+  // Fetch initial notifications from API
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      fetchNotifications();
+      fetchUnreadCount();
+    } else {
+      setNotifications([]);
+      setUnreadCount(0);
+    }
+  }, [isAuthenticated, user]);
 
-    //   socketRef.current.on('connect', () => {
-    //     console.log('Connected to notification server');
-    //   });
+  // Listen for real-time notifications via Socket.IO
+  useEffect(() => {
+    if (connected && socket && isAuthenticated) {
+      console.log('🔔 Setting up notification listener for user:', user?.fullName);
 
-    //   // Listen for notifications
-    //   socketRef.current.on('notification', (data) => {
-    //     const notification = {
-    //       id: Date.now(),
-    //       ...data,
-    //       read: false,
-    //       createdAt: new Date().toISOString(),
-    //     };
-    //     setNotifications((prev) => [notification, ...prev]);
-    //     setUnreadCount((prev) => prev + 1);
+      const handleNotification = (data) => {
+        console.log('🔔 Received notification:', data);
 
-    //     // Show toast based on notification type
-    //     switch (data.type) {
-    //       case 'booking':
-    //         toast.success(data.message);
-    //         break;
-    //       case 'order':
-    //         toast.success(data.message);
-    //         break;
-    //       case 'product':
-    //         toast.info(data.message);
-    //         break;
-    //       case 'event':
-    //         toast.info(data.message);
-    //         break;
-    //       case 'venue':
-    //         toast.info(data.message);
-    //         break;
-    //       case 'review':
-    //         toast.success(data.message);
-    //         break;
-    //       case 'error':
-    //         toast.error(data.message);
-    //         break;
-    //       default:
-    //         toast.info(data.message);
-    //     }
-    //   });
+        setNotifications((prev) => {
+          console.log('📋 Adding notification to list. Current count:', prev.length);
+          return [data, ...prev];
+        });
+        setUnreadCount((prev) => {
+          const newCount = prev + 1;
+          console.log('🔢 Updating unread count:', prev, '->', newCount);
+          return newCount;
+        });
 
-    //   socketRef.current.on('disconnect', () => {
-    //     console.log('Disconnected from notification server');
-    //   });
+        // Show toast based on notification type
+        const message = data.message || data.title;
+        switch (data.type) {
+          case 'event_created':
+          case 'event_approved':
+          case 'event_booking':
+            toast.success(message);
+            break;
+          case 'order_placed':
+          case 'order_confirmed':
+          case 'order_shipped':
+          case 'order_delivered':
+            toast.success(message);
+            break;
+          case 'payment_received':
+            toast.success(message);
+            break;
+          case 'payment_failed':
+          case 'event_rejected':
+          case 'event_cancelled':
+          case 'order_cancelled':
+            toast.error(message);
+            break;
+          case 'venue_booking':
+          case 'venue_approved':
+            toast.info(message);
+            break;
+          case 'venue_rejected':
+            toast.error(message);
+            break;
+          default:
+            toast.info(message);
+        }
 
-    //   return () => {
-    //     if (socketRef.current) {
-    //       socketRef.current.disconnect();
-    //     }
-    //   };
-    // }
-  }, [isAuthenticated, user, toast]);
+        // Show browser notification if permission granted
+        if (Notification.permission === 'granted') {
+          new Notification(data.title || 'New Notification', {
+            body: message,
+            icon: '/logo.png',
+            badge: '/logo.png'
+          });
+        }
+      };
 
-  const markAsRead = useCallback((notificationId) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
-    );
-    setUnreadCount((prev) => Math.max(0, prev - 1));
+      socket.on('notification', handleNotification);
+
+      return () => {
+        socket.off('notification', handleNotification);
+      };
+    }
+  }, [connected, socket, isAuthenticated, toast]);
+
+  // Fetch notifications from API
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const response = await notificationAPI.getNotifications(20, 0, false);
+      setNotifications(response.data.notifications || []);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch unread count
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await notificationAPI.getUnreadCount();
+      console.log('Unread count response:', response);
+      const count = typeof response.data.count === 'number' ? response.data.count : 0;
+      setUnreadCount(count);
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  };
+
+  const markAsRead = useCallback(async (notificationId) => {
+    try {
+      await notificationAPI.markAsRead(notificationId);
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === notificationId ? { ...n, read: true } : n))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Error marking as read:', error);
+    }
   }, []);
 
-  const markAllAsRead = useCallback(() => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    setUnreadCount(0);
+  const markAllAsRead = useCallback(async () => {
+    try {
+      await notificationAPI.markAllAsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+    }
   }, []);
 
   const clearNotifications = useCallback(() => {
@@ -104,36 +164,31 @@ export const NotificationProvider = ({ children }) => {
     setUnreadCount(0);
   }, []);
 
-  // Emit notification to server (for local actions)
-  const emitNotification = useCallback((type, message, data = {}) => {
-    if (socketRef.current?.connected) {
-      socketRef.current.emit('activity', { type, message, data });
+  const deleteNotification = useCallback(async (notificationId) => {
+    try {
+      await notificationAPI.delete(notificationId);
+      setNotifications((prev) => prev.filter((n) => n._id !== notificationId));
+      const notification = notifications.find((n) => n._id === notificationId);
+      if (notification && !notification.read) {
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+      }
+    } catch (error) {
+      console.error('Error deleting notification:', error);
     }
-    // Also show local toast immediately
-    switch (type) {
-      case 'success':
-        toast.success(message);
-        break;
-      case 'error':
-        toast.error(message);
-        break;
-      case 'warning':
-        toast.warning(message);
-        break;
-      default:
-        toast.info(message);
-    }
-  }, [toast]);
+  }, [notifications]);
 
   return (
     <NotificationContext.Provider
       value={{
         notifications,
         unreadCount,
+        loading,
         markAsRead,
         markAllAsRead,
         clearNotifications,
-        emitNotification,
+        deleteNotification,
+        fetchNotifications,
+        fetchUnreadCount,
       }}
     >
       {children}

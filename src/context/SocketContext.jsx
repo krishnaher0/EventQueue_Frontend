@@ -25,20 +25,28 @@ export const SocketProvider = ({ children }) => {
       const newSocket = io('http://localhost:3000', {
         auth: { token },
         autoConnect: true,
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
       });
 
       newSocket.on('connect', () => {
-        console.log('Socket connected');
+        console.log('✅ Socket connected successfully! Socket ID:', newSocket.id);
         setConnected(true);
       });
 
       newSocket.on('disconnect', () => {
-        console.log('Socket disconnected');
+        console.log('❌ Socket disconnected');
         setConnected(false);
       });
 
+      newSocket.on('connect_error', (error) => {
+        console.error('❌ Socket connection error:', error.message);
+      });
+
       newSocket.on('error', (error) => {
-        console.error('Socket error:', error);
+        console.error('❌ Socket error:', error);
       });
 
       setSocket(newSocket);
