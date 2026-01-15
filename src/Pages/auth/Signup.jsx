@@ -245,7 +245,7 @@ const SignupPage = () => {
               <button
                 type="submit"
                 disabled={formik.isSubmitting}
-                className="w-full bg-secondary text-white py-3 rounded-lg font-semibold hover:bg-slate-900 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-secondary text-white py-3 rounded-lg font-semibold bg-slate-900 flex items-center justify-center gap-2"
               >
                 {formik.isSubmitting ? (
                   <>

@@ -21,6 +21,11 @@ const PaymentSuccess = () => {
   const transactionId = searchParams.get('transaction_id');
   const khaltiStatus = searchParams.get('status');
 
+  // eSewa params (returns as query parameters)
+  const esewaOid = searchParams.get('oid'); // transaction UUID
+  const esewaAmt = searchParams.get('amt'); // amount
+  const esewaRefId = searchParams.get('refId'); // reference ID from eSewa
+
   // Fix: If type contains "?data=", split it properly
   if (type && type.includes('?data=')) {
     const parts = type.split('?data=');
@@ -71,7 +76,16 @@ const PaymentSuccess = () => {
       return;
     }
 
-    // Handle eSewa callback
+    // Handle eSewa callback (query parameters)
+    if (esewaOid && esewaRefId) {
+      verificationAttempted.current = true;
+      console.log('eSewa payment detected - redirecting to backend for verification');
+      // Redirect to backend verification endpoint with query params
+      window.location.href = `http://localhost:3000/api/payments/${type}/verify?oid=${esewaOid}&amt=${esewaAmt}&refId=${esewaRefId}`;
+      return;
+    }
+
+    // Handle base64 data callback (if any)
     if (data) {
       verificationAttempted.current = true;
       verifyPayment();

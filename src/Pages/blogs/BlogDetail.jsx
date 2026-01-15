@@ -306,7 +306,7 @@ const BlogDetail = () => {
                     <button
                       type="submit"
                       disabled={submittingComment || !commentContent.trim()}
-                      className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-6 py-2 bg-blue-200 text-black rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {submittingComment ? 'Posting...' : 'Post Comment'}
                     </button>

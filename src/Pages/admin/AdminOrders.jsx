@@ -104,7 +104,7 @@ const AdminOrders = () => {
     return (
       <AdminLayout title="Product Orders">
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
         </div>
       </AdminLayout>
     );
@@ -120,7 +120,7 @@ const AdminOrders = () => {
         <button
           onClick={() => handleStatusFilter('')}
           className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${
-            statusFilter === '' ? 'bg-primary text-white' : 'bg-white text-slate-600 border border-slate-200'
+            statusFilter === '' ? 'bg-blue-200 text-black' : 'bg-white text-slate-600 border border-slate-200'
           }`}
         >
           All
@@ -128,7 +128,7 @@ const AdminOrders = () => {
         <button
           onClick={() => handleStatusFilter('pending')}
           className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${
-            statusFilter === 'pending' ? 'bg-primary text-white' : 'bg-white text-slate-600 border border-slate-200'
+            statusFilter === 'pending' ? 'bg-blue-200 text-black' : 'bg-white text-slate-600 border border-slate-200'
           }`}
         >
           Pending
@@ -136,7 +136,7 @@ const AdminOrders = () => {
         <button
           onClick={() => handleStatusFilter('processing')}
           className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${
-            statusFilter === 'processing' ? 'bg-primary text-white' : 'bg-white text-slate-600 border border-slate-200'
+            statusFilter === 'processing' ? 'bg-blue-200 text-black' : 'bg-white text-slate-600 border border-slate-200'
           }`}
         >
           Processing
@@ -144,7 +144,7 @@ const AdminOrders = () => {
         <button
           onClick={() => handleStatusFilter('shipped')}
           className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${
-            statusFilter === 'shipped' ? 'bg-primary text-white' : 'bg-white text-slate-600 border border-slate-200'
+            statusFilter === 'shipped' ? 'bg-blue-200 text-black' : 'bg-white text-slate-600 border border-slate-200'
           }`}
         >
           Shipped
@@ -152,7 +152,7 @@ const AdminOrders = () => {
         <button
           onClick={() => handleStatusFilter('delivered')}
           className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${
-            statusFilter === 'delivered' ? 'bg-primary text-white' : 'bg-white text-slate-600 border border-slate-200'
+            statusFilter === 'delivered' ? 'bg-blue-200 text-black' : 'bg-white text-slate-600 border border-slate-200'
           }`}
         >
           Delivered
@@ -160,7 +160,7 @@ const AdminOrders = () => {
         <button
           onClick={() => handleStatusFilter('cancelled')}
           className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${
-            statusFilter === 'cancelled' ? 'bg-primary text-white' : 'bg-white text-slate-600 border border-slate-200'
+            statusFilter === 'cancelled' ? 'bg-blue-200 text-black' : 'bg-white text-slate-600 border border-slate-200'
           }`}
         >
           Cancelled
@@ -257,20 +257,20 @@ const AdminOrders = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-slate-900">
-                          NPR {order.totalAmount?.toLocaleString() || 0}
+                          NPR {(order.pricing?.total || order.totalAmount || 0).toLocaleString()}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            order.paymentStatus === 'paid'
+                            order.payment?.status === 'paid'
                               ? 'bg-green-100 text-green-800'
-                              : order.paymentStatus === 'pending'
+                              : order.payment?.status === 'pending'
                               ? 'bg-yellow-100 text-yellow-800'
                               : 'bg-red-100 text-red-800'
                           }`}
                         >
-                          {order.paymentStatus || 'N/A'}
+                          {order.payment?.status || 'N/A'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

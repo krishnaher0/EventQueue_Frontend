@@ -107,7 +107,7 @@ const AdminVenueBookings = () => {
         <button
           onClick={() => handleStatusFilter('')}
           className={`px-4 py-2 rounded-lg text-sm font-medium ${
-            statusFilter === '' ? 'bg-primary text-white' : 'bg-white text-slate-600 border border-slate-200'
+            statusFilter === '' ? 'bg-blue-200 text-black' : 'bg-white text-slate-600 border border-slate-200'
           }`}
         >
           All
@@ -115,7 +115,7 @@ const AdminVenueBookings = () => {
         <button
           onClick={() => handleStatusFilter('pending')}
           className={`px-4 py-2 rounded-lg text-sm font-medium ${
-            statusFilter === 'pending' ? 'bg-primary text-white' : 'bg-white text-slate-600 border border-slate-200'
+            statusFilter === 'pending' ? 'bg-blue-200 text-black' : 'bg-white text-slate-600 border border-slate-200'
           }`}
         >
           Pending
@@ -123,7 +123,7 @@ const AdminVenueBookings = () => {
         <button
           onClick={() => handleStatusFilter('confirmed')}
           className={`px-4 py-2 rounded-lg text-sm font-medium ${
-            statusFilter === 'confirmed' ? 'bg-primary text-white' : 'bg-white text-slate-600 border border-slate-200'
+            statusFilter === 'confirmed' ? 'bg-blue-200 text-black' : 'bg-white text-slate-600 border border-slate-200'
           }`}
         >
           Confirmed
@@ -131,7 +131,7 @@ const AdminVenueBookings = () => {
         <button
           onClick={() => handleStatusFilter('completed')}
           className={`px-4 py-2 rounded-lg text-sm font-medium ${
-            statusFilter === 'completed' ? 'bg-primary text-white' : 'bg-white text-slate-600 border border-slate-200'
+            statusFilter === 'completed' ? 'bg-blue-200 text-black' : 'bg-white text-slate-600 border border-slate-200'
           }`}
         >
           Completed
@@ -139,7 +139,7 @@ const AdminVenueBookings = () => {
         <button
           onClick={() => handleStatusFilter('cancelled')}
           className={`px-4 py-2 rounded-lg text-sm font-medium ${
-            statusFilter === 'cancelled' ? 'bg-primary text-white' : 'bg-white text-slate-600 border border-slate-200'
+            statusFilter === 'cancelled' ? 'bg-blue-200 text-black' : 'bg-white text-slate-600 border border-slate-200'
           }`}
         >
           Cancelled

@@ -6,6 +6,7 @@ import { eventsAPI } from '../../services/api';
 import AdminLayout from '../../components/admin/AdminLayout';
 import EventCard from '../../components/admin/cards/EventCard';
 import EditEventModal from '../../components/admin/modals/EditEventModal';
+import CreateEventModal from '../../components/admin/modals/CreateEventModal';
 
 const AdminEvents = () => {
   const { user, isAuthenticated } = useAuth();
@@ -38,44 +39,54 @@ const AdminEvents = () => {
     }
   };
 
-  const formatDateForInput = (date) => {
-    if (!date) return '';
-    const d = new Date(date);
-    // Pad month, day, hour, minute
-    const pad = (n) => n.toString().padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const extractDateOnly = (datetime) => {
+    if (!datetime) return '';
+    return datetime.split('T')[0];
+  };
+
+  const extractTimeOnly = (datetime) => {
+    if (!datetime) return '';
+    const parts = datetime.split('T');
+    return parts[1] ? parts[1].substring(0, 5) : '';
   };
 
   const handleEdit = async (event) => {
     try {
       const res = await eventsAPI.getById(event._id);
       const evt = res.data ? res.data.event : res.event;
+
+      // Combine date and time for datetime-local input
+      const combineDateAndTime = (date, time) => {
+        if (!date) return '';
+        const dateStr = new Date(date).toISOString().split('T')[0];
+        const timeStr = time || '00:00';
+        return `${dateStr}T${timeStr}`;
+      };
+
       setEditingEvent({
         ...evt,
-        startDate: formatDateForInput(evt.startDate),
-        endDate: formatDateForInput(evt.endDate),
+        startDate: combineDateAndTime(evt.startDate, evt.startTime),
+        endDate: combineDateAndTime(evt.endDate, evt.endTime),
+        location: {
+          venue: evt.venueName || evt.location?.venue || '',
+          city: evt.address?.city || evt.location?.city || '',
+          address: evt.address?.street || evt.location?.address || '',
+        },
+        address: evt.address || {},
+        venueName: evt.venueName || '',
+        ticketTypes: evt.ticketTypes || [],
+        isFree: evt.isFree || false,
         imageFile: null,
         imagePreview: null,
       });
       setCreating(false);
     } catch (err) {
+      console.error('Failed to fetch event details:', err);
       toast.error('Failed to fetch event details');
     }
   };
 
   const handleCreate = () => {
-    setEditingEvent({
-      title: '',
-      description: '',
-      startDate: '',
-      endDate: '',
-      location: { venue: '', city: '', address: '' },
-      image: '',
-      ticketTypes: [],
-      category: '',
-      status: 'draft',
-      organizer: user,
-    });
     setCreating(true);
   };
 
@@ -84,15 +95,36 @@ const AdminEvents = () => {
       const formData = new FormData();
       formData.append('title', updatedEvent.title);
       formData.append('description', updatedEvent.description);
-      formData.append('startDate', updatedEvent.startDate);
-      formData.append('endDate', updatedEvent.endDate);
+
+      // Handle date and time properly
+      const startDateOnly = extractDateOnly(updatedEvent.startDate);
+      const startTimeOnly = extractTimeOnly(updatedEvent.startDate);
+      const endDateOnly = extractDateOnly(updatedEvent.endDate);
+      const endTimeOnly = extractTimeOnly(updatedEvent.endDate);
+
+      formData.append('startDate', startDateOnly);
+      formData.append('endDate', endDateOnly || startDateOnly);
+      formData.append('startTime', startTimeOnly);
+      formData.append('endTime', endTimeOnly || startTimeOnly);
+
       formData.append('category', updatedEvent.category);
       formData.append('status', updatedEvent.status);
-      formData.append('isFeatured', updatedEvent.isFeatured);
-      formData.append('location[venue]', updatedEvent.location?.venue || '');
-      formData.append('location[city]', updatedEvent.location?.city || '');
-      formData.append('location[address]', updatedEvent.location?.address || '');
+      formData.append('isFeatured', updatedEvent.isFeatured || false);
+      formData.append('isFree', updatedEvent.isFree || false);
+
+      // Location fields
+      formData.append('venueName', updatedEvent.location?.venue || updatedEvent.venueName || '');
+      formData.append('address[street]', updatedEvent.location?.address || updatedEvent.address?.street || '');
+      formData.append('address[city]', updatedEvent.location?.city || updatedEvent.address?.city || '');
+      formData.append('address[state]', updatedEvent.address?.state || '');
+      formData.append('address[country]', updatedEvent.address?.country || 'Nepal');
+      formData.append('address[zipCode]', updatedEvent.address?.zipCode || '');
+
+      if (updatedEvent.ticketTypes) {
+        formData.append('ticketTypes', JSON.stringify(updatedEvent.ticketTypes));
+      }
       if (updatedEvent.imageFile) formData.append('image', updatedEvent.imageFile);
+
       await eventsAPI.update(updatedEvent._id, formData);
       toast.success('Event updated successfully');
       setEditingEvent(null);
@@ -106,25 +138,94 @@ const AdminEvents = () => {
   const handleSaveCreate = async (newEvent) => {
     try {
       const formData = new FormData();
+
+      // Basic Information
       formData.append('title', newEvent.title);
       formData.append('description', newEvent.description);
-      formData.append('startDate', newEvent.startDate);
-      formData.append('endDate', newEvent.endDate);
       formData.append('category', newEvent.category);
-      formData.append('status', newEvent.status);
-      formData.append('isFeatured', newEvent.isFeatured);
-      formData.append('location[venue]', newEvent.location?.venue || '');
-      formData.append('location[city]', newEvent.location?.city || '');
-      formData.append('location[address]', newEvent.location?.address || '');
-      if (newEvent.imageFile) formData.append('image', newEvent.imageFile);
+      formData.append('status', newEvent.status || 'draft');
+      formData.append('isFeatured', newEvent.isFeatured || false);
+
+      if (newEvent.shortDescription) {
+        formData.append('shortDescription', newEvent.shortDescription);
+      }
+
+      // Date & Time - extract date and time separately
+      if (newEvent.startDate) {
+        const startDateOnly = extractDateOnly(newEvent.startDate);
+        const startTimeOnly = extractTimeOnly(newEvent.startDate);
+        formData.append('startDate', startDateOnly);
+        formData.append('startTime', startTimeOnly);
+      }
+      if (newEvent.endDate) {
+        const endDateOnly = extractDateOnly(newEvent.endDate);
+        const endTimeOnly = extractTimeOnly(newEvent.endDate);
+        formData.append('endDate', endDateOnly);
+        formData.append('endTime', endTimeOnly);
+      }
+
+      // Location
+      formData.append('venueType', newEvent.venueType || 'physical');
+      if (newEvent.venueName) {
+        formData.append('venueName', newEvent.venueName);
+      }
+      if (newEvent.onlineLink) {
+        formData.append('onlineLink', newEvent.onlineLink);
+      }
+
+      // Address
+      if (newEvent.address) {
+        if (newEvent.address.street) formData.append('address[street]', newEvent.address.street);
+        if (newEvent.address.city) formData.append('address[city]', newEvent.address.city);
+        if (newEvent.address.state) formData.append('address[state]', newEvent.address.state);
+        if (newEvent.address.country) formData.append('address[country]', newEvent.address.country);
+        if (newEvent.address.zipCode) formData.append('address[zipCode]', newEvent.address.zipCode);
+      }
+
+      // For backward compatibility with location field
+      formData.append('location[venue]', newEvent.venueName || newEvent.location?.venue || '');
+      formData.append('location[city]', newEvent.address?.city || newEvent.location?.city || '');
+      formData.append('location[address]', newEvent.address?.street || newEvent.location?.address || '');
+
+      // Tickets & Pricing
+      formData.append('isFree', newEvent.isFree || false);
+      if (newEvent.ticketTypes && newEvent.ticketTypes.length > 0) {
+        formData.append('ticketTypes', JSON.stringify(newEvent.ticketTypes));
+      }
+      if (newEvent.totalCapacity) {
+        formData.append('totalCapacity', newEvent.totalCapacity);
+      }
+
+      // Additional Details
+      if (newEvent.ageRestriction) {
+        formData.append('ageRestriction', newEvent.ageRestriction);
+      }
+      if (newEvent.refundPolicy) {
+        formData.append('refundPolicy', newEvent.refundPolicy);
+      }
+      if (newEvent.termsAndConditions) {
+        formData.append('termsAndConditions', newEvent.termsAndConditions);
+      }
+      if (newEvent.contactEmail) {
+        formData.append('contactEmail', newEvent.contactEmail);
+      }
+      if (newEvent.contactPhone) {
+        formData.append('contactPhone', newEvent.contactPhone);
+      }
+
+      // Image
+      if (newEvent.imageFile) {
+        formData.append('image', newEvent.imageFile);
+      }
+
       await eventsAPI.create(formData);
       toast.success('Event created successfully');
-      setEditingEvent(null);
       setCreating(false);
       fetchEvents();
     } catch (err) {
       console.error('Error creating event:', err);
-      toast.error('Failed to create event');
+      const errorMessage = err.response?.data?.message || 'Failed to create event';
+      toast.error(errorMessage);
     }
   };
 
@@ -141,7 +242,9 @@ const AdminEvents = () => {
 
   const handleUnpublish = async (event) => {
     try {
-      await eventsAPI.updateEvent(event._id, { status: 'draft' });
+      const formData = new FormData();
+      formData.append('status', 'draft');
+      await eventsAPI.update(event._id, formData);
       toast.success('Event unpublished');
       fetchEvents();
     } catch (err) {
@@ -164,7 +267,7 @@ const AdminEvents = () => {
   const handleDelete = async (eventId) => {
     if (!window.confirm('Are you sure you want to delete this event?')) return;
     try {
-      await eventsAPI.deleteEvent(eventId);
+      await eventsAPI.delete(eventId);
       toast.success('Event deleted');
       fetchEvents();
     } catch (err) {
@@ -181,10 +284,10 @@ const AdminEvents = () => {
   return (
     <AdminLayout title="Events Management" subtitle="Manage all events on the platform">
       {/* Create Event Button */}
-      <div className="flex justify-end mb-4 text-black[400]">
+      <div className="flex justify-end mb-2 text-black[400]">
         <button
           onClick={handleCreate}
-          className="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/80 transition"
+          className="px-6 py-3 bg-blue-200 text-black rounded-lg font-medium hover:bg-blue-600 transition"
         >
           + Create Event
         </button>
@@ -198,7 +301,7 @@ const AdminEvents = () => {
             onClick={() => setFilter(status)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               filter === status
-                ? 'bg-primary text-white'
+                ? 'bg-blue-200 text-black'
                 : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
             }`}
           >
@@ -238,12 +341,20 @@ const AdminEvents = () => {
         </div>
       )}
 
-      {/* Edit/Create Modal */}
-      {(editingEvent && (creating || editingEvent._id)) && (
+      {/* Create Modal */}
+      {creating && (
+        <CreateEventModal
+          onClose={() => setCreating(false)}
+          onSave={handleSaveCreate}
+        />
+      )}
+
+      {/* Edit Modal */}
+      {editingEvent && !creating && (
         <EditEventModal
           event={editingEvent}
-          onClose={() => { setEditingEvent(null); setCreating(false); }}
-          onSave={creating ? handleSaveCreate : handleSaveEdit}
+          onClose={() => setEditingEvent(null)}
+          onSave={handleSaveEdit}
         />
       )}
     </AdminLayout>

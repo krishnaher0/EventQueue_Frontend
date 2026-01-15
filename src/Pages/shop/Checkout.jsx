@@ -374,7 +374,11 @@ const Checkout = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-6 py-4 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                  className={`w-full mt-6 py-4 text-white rounded-xl font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2 ${
+                    paymentMethod === 'khalti'
+                      ? 'bg-purple-600 hover:bg-purple-700'
+                      : 'bg-green-600 hover:bg-green-700'
+                  }`}
                 >
                   {loading ? (
                     <>
@@ -383,12 +387,25 @@ const Checkout = () => {
                     </>
                   ) : (
                     <>
-                      <img
-                        src="https://esewa.com.np/common/images/esewa-logo.png"
-                        alt="eSewa"
-                        className="h-5 invert"
-                      />
-                      Pay with eSewa
+                      {paymentMethod === 'khalti' ? (
+                        <>
+                          <img
+                            src="https://khalti.com/static/images/logo1.png"
+                            alt="Khalti"
+                            className="h-5 invert"
+                          />
+                          Pay with Khalti
+                        </>
+                      ) : (
+                        <>
+                          <img
+                            src="https://esewa.com.np/common/images/esewa-logo.png"
+                            alt="eSewa"
+                            className="h-5 invert"
+                          />
+                          Pay with eSewa
+                        </>
+                      )}
                     </>
                   )}
                 </button>

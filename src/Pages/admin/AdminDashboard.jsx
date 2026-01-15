@@ -125,7 +125,7 @@ const AdminDashboard = () => {
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium whitespace-nowrap transition-colors relative ${
               activeTab === tab.id
-                ? 'bg-primary text-white'
+                ? 'bg-blue-200 text-black'
                 : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
             }`}
           >
@@ -175,7 +175,7 @@ const AdminDashboard = () => {
 
           {/* Recent Events */}
           <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-slate-800 mb-4">Recent Events</h2>
+            <h2 className="text-lg font-semibold mb-4">Recent Events</h2>
             <div className="space-y-4">
               {events.slice(0, 5).map(event => (
                 <div key={event._id} className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0">

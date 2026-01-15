@@ -468,7 +468,7 @@ const CreateCommunity = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-primary to-purple-600 text-white rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="flex-1 px-6 py-3 bg-slate-800 text-white rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
                 {loading ? 'Creating Community...' : 'Create Community'}
               </button>

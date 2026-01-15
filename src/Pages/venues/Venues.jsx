@@ -57,44 +57,80 @@ const Venues = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="align-center text-blue py-16">
+      {/* Hero Section */}
+      <div className="bg-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold mb-4">Spot Your Desired Venues</h1>
-          <p className="text-xl text-black-100">
-            Find the perfect venue for your events - conferences, weddings, parties, and more
-          </p>
+          {/* Title */}
+          <div className="text-center mb-12">
+            <h1 className="text-5xl md:text-6xl font-bold text-blue-600 mb-4 italic">
+              Spot your desired Venues
+            </h1>
+            <p className="text-lg text-gray-700 italic">
+              This is the perfect place for you to search for your desired venues to conduct various events
+            </p>
+          </div>
+
+          {/* Search Box */}
+          <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-lg p-4">
+            <div className="flex flex-col md:flex-row gap-3">
+              {/* Search Input */}
+              <div className="flex-1 relative">
+                <svg
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search venues..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Type Filter */}
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 w-full md:w-48"
+              >
+                {VENUE_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type === 'All' ? 'All Types' : type}
+                  </option>
+                ))}
+              </select>
+
+              {/* Location Filter */}
+              <input
+                type="text"
+                placeholder="All Locations"
+                value={cityFilter}
+                onChange={(e) => setCityFilter(e.target.value)}
+                className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 w-full md:w-48"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filters and Search */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-8">
-          {/* Search */}
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Search venues..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
-          </div>
-
-          {/* City Filter */}
-          <input
-            type="text"
-            placeholder="Filter by city..."
-            value={cityFilter}
-            onChange={(e) => setCityFilter(e.target.value)}
-            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 w-48"
-          />
-
-          {/* Sort */}
+        {/* Sort and Featured Section Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Featured Venues</h2>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
           >
             <option value="-createdAt">Newest First</option>
             <option value="pricing.basePrice">Price: Low to High</option>
@@ -103,23 +139,6 @@ const Venues = () => {
             <option value="capacity.maximum">Capacity: Low to High</option>
             <option value="-capacity.maximum">Capacity: High to Low</option>
           </select>
-        </div>
-
-        {/* Venue Types */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          {VENUE_TYPES.map((type) => (
-            <button
-              key={type}
-              onClick={() => setSelectedType(type)}
-              className={`px-4 py-2 rounded-full transition ${
-                selectedType === type
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:border-indigo-500'
-              }`}
-            >
-              {type}
-            </button>
-          ))}
         </div>
 
         {/* Venues Grid */}

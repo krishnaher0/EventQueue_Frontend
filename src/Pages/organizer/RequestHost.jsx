@@ -336,7 +336,7 @@ const RequestHost = () => {
                   onClick={() => handleCategoryToggle(cat.value)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                     formData.eventCategories.includes(cat.value)
-                      ? 'bg-primary text-white'
+                      ? 'bg-blue-200 text-black'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
@@ -455,7 +455,7 @@ const RequestHost = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-primary text-white py-4 rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-blue-400 text-black py-4 rounded-lg font-semibold hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? (
               <span className="flex items-center justify-center gap-2">

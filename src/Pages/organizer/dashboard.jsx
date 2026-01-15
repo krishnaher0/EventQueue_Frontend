@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { eventsAPI } from '../../services/api';
+import CreateEventModal from '../../components/admin/modals/CreateEventModal';
+import EditEventModal from '../../components/admin/modals/EditEventModal';
 
 const OrganizerDashboard = () => {
   const { user, isAuthenticated } = useAuth();
@@ -11,6 +13,8 @@ const OrganizerDashboard = () => {
   const [stats, setStats] = useState(null);
   const [events, setEvents] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -53,8 +57,154 @@ const OrganizerDashboard = () => {
     }
   };
 
+  const formatDateForInput = (date) => {
+    if (!date) return '';
+    try {
+      const d = new Date(date);
+      if (isNaN(d.getTime())) return '';
+      const pad = (n) => n.toString().padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    } catch (e) {
+      return '';
+    }
+  };
+
+  const extractDateOnly = (datetime) => {
+    if (!datetime) return '';
+    return datetime.split('T')[0];
+  };
+
+  const extractTimeOnly = (datetime) => {
+    if (!datetime) return '';
+    const parts = datetime.split('T');
+    return parts[1] ? parts[1].substring(0, 5) : '';
+  };
+
+  const handleEdit = async (event) => {
+    try {
+      const res = await eventsAPI.getById(event._id);
+      const evt = res.data ? res.data.event : res.event;
+
+      // Combine date and time for datetime-local input
+      const combineDateAndTime = (date, time) => {
+        if (!date) return '';
+        const dateStr = new Date(date).toISOString().split('T')[0];
+        const timeStr = time || '00:00';
+        return `${dateStr}T${timeStr}`;
+      };
+
+      setEditingEvent({
+        ...evt,
+        startDate: combineDateAndTime(evt.startDate, evt.startTime),
+        endDate: combineDateAndTime(evt.endDate, evt.endTime),
+        location: {
+          venue: evt.venueName || evt.location?.venue || '',
+          city: evt.address?.city || evt.location?.city || '',
+          address: evt.address?.street || evt.location?.address || '',
+        },
+        address: evt.address || {},
+        venueName: evt.venueName || '',
+        ticketTypes: evt.ticketTypes || [],
+        isFree: evt.isFree || false,
+        imageFile: null,
+        imagePreview: null,
+      });
+      setCreating(false);
+    } catch (err) {
+      console.error('Failed to fetch event details:', err);
+      alert('Failed to load event: ' + (err.message || 'Unknown error'));
+    }
+  };
+
+  const handleCreate = () => {
+    setCreating(true);
+    setEditingEvent(null);
+  };
+
+  const handleSaveEdit = async (updatedEvent) => {
+    try {
+      const formData = new FormData();
+      formData.append('title', updatedEvent.title);
+      formData.append('description', updatedEvent.description);
+
+      // Handle date and time properly
+      const startDateOnly = extractDateOnly(updatedEvent.startDate);
+      const startTimeOnly = extractTimeOnly(updatedEvent.startDate);
+      const endDateOnly = extractDateOnly(updatedEvent.endDate);
+      const endTimeOnly = extractTimeOnly(updatedEvent.endDate);
+
+      formData.append('startDate', startDateOnly);
+      formData.append('endDate', endDateOnly || startDateOnly);
+      formData.append('startTime', startTimeOnly);
+      formData.append('endTime', endTimeOnly || startTimeOnly);
+
+      formData.append('category', updatedEvent.category);
+      formData.append('status', updatedEvent.status);
+      formData.append('isFeatured', updatedEvent.isFeatured || false);
+      formData.append('isFree', updatedEvent.isFree || false);
+
+      // Location fields
+      formData.append('venueName', updatedEvent.location?.venue || updatedEvent.venueName || '');
+      formData.append('address[street]', updatedEvent.location?.address || updatedEvent.address?.street || '');
+      formData.append('address[city]', updatedEvent.location?.city || updatedEvent.address?.city || '');
+      formData.append('address[state]', updatedEvent.address?.state || '');
+      formData.append('address[country]', updatedEvent.address?.country || 'Nepal');
+      formData.append('address[zipCode]', updatedEvent.address?.zipCode || '');
+
+      if (updatedEvent.ticketTypes) {
+        formData.append('ticketTypes', JSON.stringify(updatedEvent.ticketTypes));
+      }
+      if (updatedEvent.imageFile) formData.append('image', updatedEvent.imageFile);
+
+      await eventsAPI.update(updatedEvent._id, formData);
+      setEditingEvent(null);
+      fetchData();
+    } catch (err) {
+      console.error('Error updating event:', err);
+      alert('Failed to update event: ' + (err.message || 'Unknown error'));
+    }
+  };
+
+  const handleSaveCreate = async (newEvent) => {
+    try {
+      const formData = new FormData();
+      formData.append('title', newEvent.title);
+      formData.append('description', newEvent.description);
+      formData.append('category', newEvent.category);
+      formData.append('status', newEvent.status || 'pending');
+      formData.append('isFeatured', newEvent.isFeatured || false);
+      formData.append('shortDescription', newEvent.shortDescription || '');
+      formData.append('startDate', newEvent.startDate);
+      if (newEvent.endDate) formData.append('endDate', newEvent.endDate);
+      formData.append('venueType', newEvent.venueType || 'physical');
+      if (newEvent.venueName) formData.append('venueName', newEvent.venueName);
+      if (newEvent.onlineLink) formData.append('onlineLink', newEvent.onlineLink);
+      if (newEvent.address) {
+        if (newEvent.address.street) formData.append('address[street]', newEvent.address.street);
+        if (newEvent.address.city) formData.append('address[city]', newEvent.address.city);
+        if (newEvent.address.state) formData.append('address[state]', newEvent.address.state);
+        if (newEvent.address.country) formData.append('address[country]', newEvent.address.country);
+        if (newEvent.address.zipCode) formData.append('address[zipCode]', newEvent.address.zipCode);
+      }
+      formData.append('location[venue]', newEvent.venueName || newEvent.location?.venue || '');
+      formData.append('location[city]', newEvent.address?.city || newEvent.location?.city || '');
+      formData.append('location[address]', newEvent.address?.street || newEvent.location?.address || '');
+      formData.append('isFree', newEvent.isFree || false);
+      if (newEvent.ticketTypes && newEvent.ticketTypes.length > 0) {
+        formData.append('ticketTypes', JSON.stringify(newEvent.ticketTypes));
+      }
+      if (newEvent.totalCapacity) formData.append('totalCapacity', newEvent.totalCapacity);
+      if (newEvent.imageFile) formData.append('image', newEvent.imageFile);
+      await eventsAPI.create(formData);
+      setCreating(false);
+      fetchData();
+    } catch (err) {
+      console.error('Error creating event:', err);
+    }
+  };
+
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z' },
+    { id: 'overview', label: 'Overview', icon: ' ' },
     { id: 'events', label: 'My Events', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
     { id: 'bookings', label: 'Bookings', icon: 'M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z' },
     { id: 'analytics', label: 'Analytics', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
@@ -88,15 +238,15 @@ const OrganizerDashboard = () => {
             <h1 className="text-2xl font-bold text-slate-800">Organizer Dashboard</h1>
             <p className="text-slate-600">Manage your events and track performance</p>
           </div>
-          <Link
-            to="/create-event"
-            className="bg-primary text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2"
+          <button
+            onClick={handleCreate}
+            className="bg-primary text-white px-6 py-2.5 rounded-lg font-semibold bg-blue-200 hover:bg-blue-600 transition-colors flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
             </svg>
             Create Event
-          </Link>
+          </button>
         </div>
 
         {/* Tabs */}
@@ -105,9 +255,9 @@ const OrganizerDashboard = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium whitespace-nowrap transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium whitespace-nowrap hover:bg-blue-300 transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-primary text-white'
+                  ? 'bg-blue-500 text-black hover:bg-blue-600'
                   : 'bg-white text-slate-600 hover:bg-slate-100'
               }`}
             >
@@ -295,15 +445,15 @@ const OrganizerDashboard = () => {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
                           </Link>
-                          <Link
-                            to={`/edit-event/${event._id}`}
+                          <button
+                            onClick={() => handleEdit(event)}
                             className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
                             title="Edit"
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
-                          </Link>
+                          </button>
                           <button
                             onClick={() => handleDeleteEvent(event._id)}
                             className="p-2 text-slate-400 hover:text-red-600 transition-colors"
@@ -473,7 +623,7 @@ const OrganizerDashboard = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-semibold text-slate-800">NPR {event.totalRevenue?.toLocaleString() || 0}</p>
+                      <p className="text-lg font-semibold text-slate-800">NPR {stats?.totalRevenue?.toLocaleString() || 0}</p>
                       <p className="text-sm text-slate-500">Revenue</p>
                     </div>
                   </div>
@@ -486,6 +636,22 @@ const OrganizerDashboard = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Modals */}
+        {creating && (
+          <CreateEventModal
+            onClose={() => setCreating(false)}
+            onSave={handleSaveCreate}
+          />
+        )}
+
+        {editingEvent && (
+          <EditEventModal
+            event={editingEvent}
+            onClose={() => setEditingEvent(null)}
+            onSave={handleSaveEdit}
+          />
         )}
       </div>
     </div>

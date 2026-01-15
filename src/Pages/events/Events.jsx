@@ -1,13 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import EventCard from "../../components/events/EventCard";
 import { eventsAPI } from "../../services/api";
 
-
-
 const categories = [
   'All',
-  'Business Seminar',
+  'Business',
   'Social & Networking',
   'Sports & Fitness',
   'Food & Drink',
@@ -35,6 +33,39 @@ const Events = () => {
     search: searchParams.get('search') || '',
     location: searchParams.get('location') || ''
   });
+
+  const [searchInput, setSearchInput] = useState(filters.search);
+  const [locationInput, setLocationInput] = useState(filters.location);
+
+  // Debounced search effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilters(prev => ({ ...prev, search: searchInput }));
+      if (searchInput) {
+        searchParams.set('search', searchInput);
+      } else {
+        searchParams.delete('search');
+      }
+      setSearchParams(searchParams);
+    }, 300); // 300ms debounce delay for faster response
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // Debounced location effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilters(prev => ({ ...prev, location: locationInput }));
+      if (locationInput) {
+        searchParams.set('location', locationInput);
+      } else {
+        searchParams.delete('location');
+      }
+      setSearchParams(searchParams);
+    }, 300); // 300ms debounce delay for faster response
+
+    return () => clearTimeout(timer);
+  }, [locationInput]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -82,24 +113,14 @@ const Events = () => {
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
-    setFilters(prev => ({ ...prev, search: value }));
-    if (value) {
-      searchParams.set('search', value);
-    } else {
-      searchParams.delete('search');
-    }
-    setSearchParams(searchParams);
+    setSearchInput(value);
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
   };
 
   const handleLocationChange = (e) => {
     const value = e.target.value;
-    setFilters(prev => ({ ...prev, location: value }));
-    if (value) {
-      searchParams.set('location', value);
-    } else {
-      searchParams.delete('location');
-    }
-    setSearchParams(searchParams);
+    setLocationInput(value);
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
   };
 
   const handlePageChange = (page) => {
@@ -139,7 +160,7 @@ const Events = () => {
                 <input
                   type="text"
                   placeholder="Search events..."
-                  value={filters.search}
+                  value={searchInput}
                   onChange={handleSearchChange}
                   className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
@@ -164,7 +185,7 @@ const Events = () => {
                 <input
                   type="text"
                   placeholder="Location"
-                  value={filters.location}
+                  value={locationInput}
                   onChange={handleLocationChange}
                   className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
@@ -180,7 +201,7 @@ const Events = () => {
                 onClick={() => handleCategoryChange(category)}
                 className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                   filters.category === category
-                    ? 'bg-primary text-white'
+                    ? 'bg-blue-500 text-black'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
@@ -269,6 +290,8 @@ const Events = () => {
             <button
               onClick={() => {
                 setFilters({ category: 'All', search: '', location: '' });
+                setSearchInput('');
+                setLocationInput('');
                 setSearchParams({});
               }}
               className="text-primary font-medium hover:underline"
