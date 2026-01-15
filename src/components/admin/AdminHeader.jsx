@@ -4,7 +4,7 @@ const AdminHeader = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+    <div className="sticky top-0 z-40 border-b shadow-sm">
       <div className="max-w-7xl mx-auto px-4">
         {/* Top Header */}
         <div className="flex items-center justify-between py-4">

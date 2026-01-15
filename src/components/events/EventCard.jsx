@@ -1,6 +1,8 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const EventCard = ({ event }) => {
+  const navigate = useNavigate();
+
   const formatDate = (dateString) => {
     if (!dateString) return 'TBD';
     const date = new Date(dateString);
@@ -34,34 +36,9 @@ const EventCard = ({ event }) => {
 
   const price = getLowestPrice();
 
-  const handleEsewaPay = (e) => {
+  const handleBookNow = (e) => {
     e.preventDefault(); // Prevent Link navigation
-    // Replace these values with your actual eSewa merchant/test values
-    const params = {
-      amt: price,
-      psc: 0,
-      pdc: 0,
-      txAmt: 0,
-      tAmt: price,
-      pid: event._id,
-      scd: 'EPAYTEST', // your merchant code
-      su: `${window.location.origin}/payment/success`,
-      fu: `${window.location.origin}/payment/failure`
-    };
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = 'https://rc-epay.esewa.com.np/api/epay/main/v2/form'; // eSewa test URL
-
-    Object.entries(params).forEach(([key, value]) => {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = key;
-      input.value = value;
-      form.appendChild(input);
-    });
-
-    document.body.appendChild(form);
-    form.submit();
+    navigate(`/events/${event._id}`);
   };
 
   return (
@@ -129,8 +106,8 @@ const EventCard = ({ event }) => {
               {formatPrice(price, event.currency)}
             </span>
             <button
-              className="bg-secondary text-white px-4 py-2 rounded-lg text-sm font-medium cursor-pointer hover:bg-slate-900 transition-colors"
-              onClick={handleEsewaPay}
+              className="bg-secondary text-white px-4 py-2 rounded-lg text-sm font-medium cursor-pointer bg-slate-900"
+              onClick={handleBookNow}
             >
               Book Now
             </button>

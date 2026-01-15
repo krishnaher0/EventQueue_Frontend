@@ -137,7 +137,7 @@ const HeroSection = () => {
               onChange={(e) => setSearchParams({ ...searchParams, date: e.target.value })}
             />
           </div>
-          <button type="submit" className="bg-secondary text-white px-8 py-3 rounded-xl font-semibold hover:bg-slate-900 transition-colors">
+          <button type="submit" className="bg-secondary text-white px-8 py-3 rounded-xl font-semibold bg-slate-900 transition-colors">
             Search
           </button>
         </form>
