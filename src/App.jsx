@@ -74,6 +74,7 @@ import FAQ from './Pages/static/FAQ';
 import Terms from './Pages/static/Terms';
 import Privacy from './Pages/static/Privacy';
 import ContactPage from './Pages/static/Contact';
+import NotFound from './Pages/static/NotFound';
 
 
 function App() {
@@ -151,6 +152,9 @@ function App() {
                   <Route path="/faq" element={<FAQ />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
+
+                  {/* 404 Catch-all Route - Must be last */}
+                  <Route path="*" element={<NotFound />} />
                   </Routes>
                   <Footer />
                 </div>
