@@ -19,6 +19,20 @@ const Checkout = () => {
     state: '',
     zipCode: '',
   });
+  const [phoneError, setPhoneError] = useState('');
+  const [availableCities, setAvailableCities] = useState([]);
+
+  // Province and City data
+  const provinceCityData = {
+    'Gandaki': ['Pokhara', 'Kawasoti'],
+    'Bagmati': ['Kathmandu', 'Bhaktapur', 'Lalitpur', 'Hetauda', 'Narangadh'],
+    'Madhesh': ['Itahari', 'Birgunj'],
+    'Koshi': ['Biratnagar', 'Dharan'],
+    'Lumbini': ['Butwal', 'Bhairahawa'],
+    'Sudurpashchim': ['Dhangadhi', 'Mahendranagar'],
+    'Karnali': ['Birendranagar', 'Chisapani'],
+    
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem('cart');
@@ -41,12 +55,51 @@ const Checkout = () => {
   const total = subtotal + shipping;
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    // Phone number validation
+    if (name === 'phone') {
+      // Allow only numbers
+      const numericValue = value.replace(/\D/g, '');
+
+      // Limit to 10 digits
+      if (numericValue.length <= 10) {
+        setFormData({ ...formData, [name]: numericValue });
+
+        // Validation messages
+        if (numericValue.length === 0) {
+          setPhoneError('');
+        } else if (numericValue.length < 10) {
+          setPhoneError('Phone number must be 10 digits');
+        } else if (numericValue[0] !== '9') {
+          setPhoneError('Phone number must start with 9');
+        } else {
+          setPhoneError('');
+        }
+      }
+      return;
+    }
+
+    // Province change handler
+    if (name === 'state') {
+      setFormData({ ...formData, [name]: value, city: '' });
+      setAvailableCities(provinceCityData[value] || []);
+      return;
+    }
+
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Validate phone number before submission
+    if (!formData.phone || formData.phone.length !== 10 || formData.phone[0] !== '9') {
+      setError('Please enter a valid 10-digit phone number starting with 9');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -162,8 +215,14 @@ const Checkout = () => {
                       onChange={handleChange}
                       required
                       placeholder="98XXXXXXXX"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      maxLength="10"
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                        phoneError ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     />
+                    {phoneError && (
+                      <p className="mt-1 text-sm text-red-600">{phoneError}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -187,31 +246,46 @@ const Checkout = () => {
                     />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                     <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Province *
+                      </label>
+                      <select
+                        name="state"
+                        value={formData.state}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                      >
+                        <option value="">Select Province</option>
+                        {Object.keys(provinceCityData).map((province) => (
+                          <option key={province} value={province}>
+                            {province}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         City *
                       </label>
-                      <input
-                        type="text"
+                      <select
                         name="city"
                         value={formData.city}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      />
+                        disabled={!formData.state}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      >
+                        <option value="">Select City</option>
+                        {availableCities.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        State/Province
-                      </label>
-                      <input
-                        type="text"
-                        name="state"
-                        value={formData.state}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      />
-                    </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         ZIP Code
@@ -309,11 +383,7 @@ const Checkout = () => {
                     )}
                   </div>
                 </div>
-                <p className="mt-4 text-sm text-gray-500">
-                  <strong>Test Credentials:</strong><br />
-                  eSewa - ID: 9806800001, Password: Nepal@123, MPIN: 1122<br />
-                  Khalti - ID: 9800000000, MPIN: 1111, OTP: 987654
-                </p>
+               
               </div>
             </div>
 

@@ -84,7 +84,7 @@ const CategorySection = ({ categoryCounts = [] }) => {
             to={`/events?category=${encodeURIComponent(category.name)}`}
             className="bg-white border border-slate-200 rounded-xl p-6 text-center transition-all duration-200 hover:border-primary hover:shadow-md hover:-translate-y-0.5"
           >
-            <div className={`mb-4 ${category.color}`}>
+            <div className={`mb-4 ml-20 ${category.color}`}>
               {category.icon}
             </div>
             <h3 className="font-semibold mb-1">{category.name}</h3>

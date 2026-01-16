@@ -751,12 +751,12 @@ const CreateEvent = () => {
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-200">
+          <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-200 bg-blue-600">
             {currentStep > 1 ? (
               <button
                 type="button"
                 onClick={prevStep}
-                className="px-6 py-2.5 border border-slate-300 rounded-lg font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                className="px-6 py-2.5 border border-slate-300 rounded-lg font-medium bg-blue-600 text-slate-700 hover:bg-slate-50 transition-colors"
               >
                 Previous
               </button>
@@ -768,7 +768,7 @@ const CreateEvent = () => {
               <button
                 type="button"
                 onClick={nextStep}
-                className="px-6 py-2.5 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+                className="px-6 py-2.5 bg-blue-400 text-black rounded-lg font-semibold hover:bg-primary/90 transition-colors"
               >
                 Next
               </button>

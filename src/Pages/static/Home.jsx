@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { eventsAPI } from '../../services/eventApi';
+import { recommendationAPI } from '../../services/recommendationApi';
 import HeroSection from '../../components/home/HeroSection';
 import TrendingEvents from '../../components/home/TrendingEvents';
+import RecommendedEvents from '../../components/home/RecommendedEvents';
 import WhyChooseUs from '../../components/home/WhyChooseUs';
 import FAQ from './FAQ';
 import Contact from './Contact';
@@ -98,24 +100,32 @@ const sampleEvents = [
 
 const HomePage = () => {
   const [trendingEvents, setTrendingEvents] = useState([]);
+  const [recommendedEvents, setRecommendedEvents] = useState([]);
   const [categoryCounts, setCategoryCounts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(true);
+  const [recommendationBasis, setRecommendationBasis] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [trendingRes, categoryRes] = await Promise.all([
+        const [trendingRes, categoryRes, recommendationsRes] = await Promise.all([
           eventsAPI.getAll(),
-          eventsAPI.getCategoryCounts()
+          eventsAPI.getCategoryCounts(),
+          recommendationAPI.getRecommendedEvents(6)
         ]);
         setTrendingEvents(trendingRes.data.events);
         setCategoryCounts(categoryRes.data.counts);
+        setRecommendedEvents(recommendationsRes.data.events);
+        setRecommendationBasis(recommendationsRes.data.basedOn);
       } catch (error) {
         console.log('Using sample data - backend may not be running');
         setTrendingEvents(sampleEvents);
         setCategoryCounts([]);
+        setRecommendedEvents([]);
       } finally {
         setLoading(false);
+        setRecommendationsLoading(false);
       }
     };
 
@@ -126,6 +136,11 @@ const HomePage = () => {
     <main className="home-page">
       <HeroSection />
       <CategorySection categoryCounts={categoryCounts} />
+      <RecommendedEvents
+        events={recommendedEvents}
+        loading={recommendationsLoading}
+        basedOn={recommendationBasis}
+      />
       <TrendingEvents events={trendingEvents} loading={loading} />
       <WhyChooseUs />
       <FAQ />

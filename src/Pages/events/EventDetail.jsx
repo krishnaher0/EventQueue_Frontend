@@ -287,7 +287,7 @@ const EventDetail = () => {
                   <div>
                     <p className="text-sm text-slate-500">Capacity</p>
                     <p className="font-medium">
-                      {event.totalCapacity ? `${event.attendees?.length || 0} / ${event.totalCapacity}` : 'Unlimited'}
+                      {event.totalCapacity ? `${event.attendees?.length || 0} / ${event.totalCapacity}` : '50'}
                     </p>
                   </div>
                 </div>

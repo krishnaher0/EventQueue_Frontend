@@ -275,7 +275,7 @@ const PaymentSuccess = () => {
         <div className="space-y-3">
           {type === 'order' && (
             <Link
-              to="/orders"
+              to="/my-orders"
               className="block w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
             >
               View My Orders

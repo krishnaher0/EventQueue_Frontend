@@ -25,6 +25,7 @@ const VenueDetail = () => {
     contactPhone: '',
     contactEmail: '',
   });
+  const [phoneError, setPhoneError] = useState('');
 
   // Update contact info when user loads
   useEffect(() => {
@@ -54,7 +55,32 @@ const VenueDetail = () => {
   };
 
   const handleChange = (e) => {
-    setBookingData({ ...bookingData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    // Phone number validation
+    if (name === 'contactPhone') {
+      // Allow only numbers
+      const numericValue = value.replace(/\D/g, '');
+
+      // Limit to 10 digits
+      if (numericValue.length <= 10) {
+        setBookingData({ ...bookingData, [name]: numericValue });
+
+        // Validation messages
+        if (numericValue.length === 0) {
+          setPhoneError('');
+        } else if (numericValue.length < 10) {
+          setPhoneError('Phone number must be 10 digits');
+        } else if (numericValue[0] !== '9') {
+          setPhoneError('Phone number must start with 9');
+        } else {
+          setPhoneError('');
+        }
+      }
+      return;
+    }
+
+    setBookingData({ ...bookingData, [name]: value });
   };
 
   const calculatePrice = () => {
@@ -80,6 +106,12 @@ const VenueDetail = () => {
 
     if (!contactName || !contactEmail || !contactPhone) {
       setError('Please fill in all contact information (name, email, phone)');
+      return;
+    }
+
+    // Validate phone number before submission
+    if (contactPhone.length !== 10 || contactPhone[0] !== '9') {
+      setError('Please enter a valid 10-digit phone number starting with 9');
       return;
     }
 
@@ -377,8 +409,14 @@ const VenueDetail = () => {
                         onChange={handleChange}
                         required
                         placeholder="98XXXXXXXX"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                        maxLength="10"
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+                          phoneError ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       />
+                      {phoneError && (
+                        <p className="mt-1 text-xs text-red-600">{phoneError}</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -441,12 +479,7 @@ const VenueDetail = () => {
                   {bookingLoading ? 'Processing...' : `Pay with ${paymentMethod === 'khalti' ? 'Khalti' : 'eSewa'}`}
                 </button>
 
-                <p className="text-xs text-gray-500 text-center">
-                  {paymentMethod === 'esewa'
-                    ? 'Test: eSewa ID: 9806800001, Password: Nepal@123'
-                    : 'Test: Khalti ID: 9800000000, MPIN: 1111, OTP: 987654'
-                  }
-                </p>
+                
               </form>
             </div>
           </div>
