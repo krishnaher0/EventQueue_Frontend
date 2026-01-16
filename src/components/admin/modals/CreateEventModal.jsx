@@ -23,7 +23,7 @@ const CreateEventModal = ({ onClose, onSave }) => {
       street: '',
       city: '',
       state: '',
-      country: '',
+      country: 'Nepal',
       zipCode: '',
     },
     onlineLink: '',
@@ -45,6 +45,20 @@ const CreateEventModal = ({ onClose, onSave }) => {
     isFeatured: false,
   });
 
+  const [phoneError, setPhoneError] = useState('');
+  const [availableCities, setAvailableCities] = useState([]);
+
+  // Province and City data for Nepal
+  const provinceCityData = {
+    'Gandaki': ['Pokhara', 'Kawasoti'],
+    'Bagmati': ['Kathmandu', 'Bhaktapur', 'Lalitpur', 'Hetauda', 'Narangadh'],
+    'Madhesh': ['Itahari', 'Birgunj'],
+    'Koshi': ['Biratnagar', 'Dharan'],
+    'Lumbini': ['Butwal', 'Bhairahawa'],
+    'Sudurpashchim': ['Dhangadhi', 'Mahendranagar'],
+    'Karnali': ['Birendranagar', 'Chisapani'],
+  };
+
   const steps = [
     { number: 1, label: 'Basic Info', icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
     { number: 2, label: 'Date & Location', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' },
@@ -62,6 +76,39 @@ const CreateEventModal = ({ onClose, onSave }) => {
         imagePreview: URL.createObjectURL(file)
       });
     }
+  };
+
+  const handlePhoneChange = (value) => {
+    // Allow only numbers
+    const numericValue = value.replace(/\D/g, '');
+
+    // Limit to 10 digits
+    if (numericValue.length <= 10) {
+      setEventData({ ...eventData, contactPhone: numericValue });
+
+      // Validation messages
+      if (numericValue.length === 0) {
+        setPhoneError('');
+      } else if (numericValue.length < 10) {
+        setPhoneError('Phone number must be 10 digits');
+      } else if (numericValue[0] !== '9') {
+        setPhoneError('Phone number must start with 9');
+      } else {
+        setPhoneError('');
+      }
+    }
+  };
+
+  const handleProvinceChange = (province) => {
+    setEventData({
+      ...eventData,
+      address: {
+        ...eventData.address,
+        state: province,
+        city: ''
+      }
+    });
+    setAvailableCities(provinceCityData[province] || []);
   };
 
   const addTicketType = () => {
@@ -217,7 +264,7 @@ const CreateEventModal = ({ onClose, onSave }) => {
                       <button
                         type="button"
                         onClick={() => setEventData({ ...eventData, image: '', imagePreview: '', imageFile: null })}
-                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium text-sm"
+                        className="px-4 py-2 bg-red-500 text-black rounded-lg hover:bg-red-600 transition font-medium text-sm"
                       >
                         Remove
                       </button>
@@ -337,51 +384,62 @@ const CreateEventModal = ({ onClose, onSave }) => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                      City
+                      Country
                     </label>
-                    <input
-                      type="text"
-                      value={eventData.address.city}
+                    <select
+                      value={eventData.address.country}
                       onChange={(e) => setEventData({
                         ...eventData,
-                        address: { ...eventData.address, city: e.target.value }
+                        address: { ...eventData.address, country: e.target.value }
                       })}
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                      placeholder="City"
-                    />
+                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white"
+                    >
+                      <option value="Nepal">Nepal</option>
+                      <option value="India">India</option>
+                      <option value="Other">Other</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                      State/Province
+                      Province
                     </label>
-                    <input
-                      type="text"
+                    <select
                       value={eventData.address.state}
-                      onChange={(e) => setEventData({
-                        ...eventData,
-                        address: { ...eventData.address, state: e.target.value }
-                      })}
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                      placeholder="State"
-                    />
+                      onChange={(e) => handleProvinceChange(e.target.value)}
+                      disabled={eventData.address.country !== 'Nepal'}
+                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    >
+                      <option value="">Select Province</option>
+                      {Object.keys(provinceCityData).map((province) => (
+                        <option key={province} value={province}>
+                          {province}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Country
+                      City
                     </label>
-                    <input
-                      type="text"
-                      value={eventData.address.country}
+                    <select
+                      value={eventData.address.city}
                       onChange={(e) => setEventData({
                         ...eventData,
-                        address: { ...eventData.address, country: e.target.value }
+                        address: { ...eventData.address, city: e.target.value }
                       })}
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                      placeholder="Country"
-                    />
+                      disabled={!eventData.address.state || eventData.address.country !== 'Nepal'}
+                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    >
+                      <option value="">Select City</option>
+                      {availableCities.map((city) => (
+                        <option key={city} value={city}>
+                          {city}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -535,7 +593,7 @@ const CreateEventModal = ({ onClose, onSave }) => {
                       </div>
                       <div>
                         <p className="text-xs text-slate-600 mb-1">Potential Revenue</p>
-                        <p className="text-2xl font-bold text-green-600">NPR {calculatePotentialRevenue().toLocaleString()}</p>
+                        <p className="text-2xl font-bold text-blue-600">NPR {calculatePotentialRevenue().toLocaleString()}</p>
                       </div>
                     </div>
                   </div>
@@ -588,10 +646,16 @@ const CreateEventModal = ({ onClose, onSave }) => {
                 <input
                   type="tel"
                   value={eventData.contactPhone}
-                  onChange={(e) => setEventData({ ...eventData, contactPhone: e.target.value })}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                  placeholder="+977 9800000000"
+                  onChange={(e) => handlePhoneChange(e.target.value)}
+                  maxLength="10"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none ${
+                    phoneError ? 'border-red-500' : 'border-slate-300'
+                  }`}
+                  placeholder="98XXXXXXXX"
                 />
+                {phoneError && (
+                  <p className="mt-1 text-sm text-red-600">{phoneError}</p>
+                )}
               </div>
             </div>
 
@@ -726,7 +790,7 @@ const CreateEventModal = ({ onClose, onSave }) => {
 
                 {eventData.isFree && (
                   <div className="pt-4 border-t border-slate-200">
-                    <span className="inline-block px-4 py-2 bg-green-100 text-green-700 font-semibold rounded-lg">
+                    <span className="inline-block px-4 py-2 bg-blue-100 text-blue-700 font-semibold rounded-lg">
                       FREE EVENT
                     </span>
                   </div>
@@ -776,10 +840,10 @@ const CreateEventModal = ({ onClose, onSave }) => {
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition ${
                       currentStep === step.number
-                        ? 'bg-primary text-white'
+                        ? 'bg-slate-400 text-black'
                         : currentStep > step.number
-                        ? 'bg-green-500 text-white'
-                        : 'bg-slate-200 text-slate-500'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-slate-200 text-black-500'
                     }`}
                   >
                     {currentStep > step.number ? (
@@ -798,7 +862,7 @@ const CreateEventModal = ({ onClose, onSave }) => {
                 </div>
                 {index < steps.length - 1 && (
                   <div className={`w-12 md:w-20 h-0.5 mx-2 ${
-                    currentStep > step.number ? 'bg-green-500' : 'bg-slate-200'
+                    currentStep > step.number ? 'bg-blue-500' : 'bg-slate-200'
                   }`} />
                 )}
               </div>
@@ -817,7 +881,7 @@ const CreateEventModal = ({ onClose, onSave }) => {
             type="button"
             onClick={handlePrevious}
             disabled={currentStep === 1}
-            className="px-6 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-white transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 border border-slate-300 text-slate-700 rounded-lg bg-blue-300 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Previous
           </button>
@@ -830,7 +894,7 @@ const CreateEventModal = ({ onClose, onSave }) => {
             <button
               type="button"
               onClick={handleNext}
-              className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition font-medium flex items-center gap-2"
+              className="px-6 py-3 bg-blue-400 text-black rounded-lg hover:bg-primary/90 transition font-medium flex items-center gap-2"
             >
               Next
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -841,7 +905,7 @@ const CreateEventModal = ({ onClose, onSave }) => {
             <button
               type="button"
               onClick={handleSubmit}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium flex items-center gap-2"
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />

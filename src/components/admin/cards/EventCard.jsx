@@ -1,4 +1,4 @@
-const EventCard = ({ event, onEdit, onPublish, onUnpublish, onReject, onDelete }) => {
+const EventCard = ({ event, onEdit, onPublish, onUnpublish, onReject, onDelete, isOrganizer = false }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
       {/* Event Image */}
@@ -89,28 +89,32 @@ const EventCard = ({ event, onEdit, onPublish, onUnpublish, onReject, onDelete }
           >
             Edit
           </button>
-          {event.status === 'published' ? (
-            <button
-              onClick={() => onUnpublish(event)}
-              className="px-3 py-2 text-sm bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 transition font-medium"
-            >
-              Unpublish
-            </button>
-          ) : (
-            <button
-              onClick={() => onPublish(event._id)}
-              className="px-3 py-2 text-sm bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition font-medium"
-            >
-              Publish
-            </button>
-          )}
-          {event.status === 'pending' && (
-            <button
-              onClick={() => onReject(event._id)}
-              className="px-3 py-2 text-sm bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 transition font-medium"
-            >
-              Reject
-            </button>
+          {!isOrganizer && (
+            <>
+              {event.status === 'published' ? (
+                <button
+                  onClick={() => onUnpublish(event)}
+                  className="px-3 py-2 text-sm bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 transition font-medium"
+                >
+                  Unpublish
+                </button>
+              ) : (
+                <button
+                  onClick={() => onPublish(event._id)}
+                  className="px-3 py-2 text-sm bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition font-medium"
+                >
+                  Publish
+                </button>
+              )}
+              {event.status === 'pending' && (
+                <button
+                  onClick={() => onReject(event._id)}
+                  className="px-3 py-2 text-sm bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 transition font-medium"
+                >
+                  Reject
+                </button>
+              )}
+            </>
           )}
           <button
             onClick={() => onDelete(event._id)}

@@ -243,6 +243,7 @@ const EventDetail = () => {
                   <div>
                     <p className="text-sm text-slate-500">Date</p>
                     <p className="font-medium">{formatDate(event.startDate)}</p>
+                    <p className="font-medium">{formatDate(event.endDate)}</p>
                   </div>
                 </div>
 
@@ -255,7 +256,7 @@ const EventDetail = () => {
                   </div>
                   <div>
                     <p className="text-sm text-slate-500">Time</p>
-                    <p className="font-medium">{event.startTime} {event.endTime && `- ${event.endTime}`}</p>
+                    <p className="font-medium">{event.startTime} am {event.endTime && `- ${event.endTime}am`}</p>
                   </div>
                 </div>
 

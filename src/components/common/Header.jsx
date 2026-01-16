@@ -179,7 +179,7 @@ const Header = () => {
                     className="w-10 h-10 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-semibold text-lg">
+                  <div className="w-10 h-10 rounded-full bg-blue-300 text-white flex items-center justify-center font-semibold text-lg">
                     {user?.fullName?.charAt(0).toUpperCase()}
                   </div>
                 )}
